@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -26,6 +28,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @GetMapping("/role")
+    public ResponseEntity<Map<String, Object>> getRoleByEmail(@RequestParam("email") String email) {
+        String role = authService.lookupRoleByEmail(email);
+        return ResponseEntity.ok(Map.of("success", true, "role", role));
     }
 
     @PostMapping("/logout")

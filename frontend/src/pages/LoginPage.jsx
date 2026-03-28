@@ -1,27 +1,37 @@
-// This page uses the same two-column green theme design as the Registration page
-import { useState } from 'react'
+import './styles/LoginPage.css'
+
+import { useState, useEffect } from 'react'
 import axiosClient from '../api/axiosClient.js'
 import { Link, useNavigate } from 'react-router-dom'
-import happyAnimals from '../assets/images/happyanimals.png'
+import happyAnimals from '../assets/images/happyanimals.jpg'
+import happyAnimals1 from '../assets/images/happyanimals1.jpg'
+import happyAnimals2 from '../assets/images/happyanimals2.jpg'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [fieldErrors, setFieldErrors] = useState({})
+  const [fieldErrors] = useState({})
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [detectedRole, setDetectedRole] = useState(null)
+  const [carouselIndex, setCarouselIndex] = useState(0)
+  const images = [happyAnimals, happyAnimals1, happyAnimals2]
   const navigate = useNavigate()
+
+  const roleLabel = (role) => {
+    if (role === 'SERVICE_PROVIDER') return 'Service Provider'
+    if (role === 'PET_OWNER') return 'Pet Owner'
+    return role
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    setFieldErrors({})
     const nextFieldErrors = {}
     if (!email || !password) {
       if (!email) nextFieldErrors.email = 'Email is required'
       if (!password) nextFieldErrors.password = 'Password is required'
-      setFieldErrors(nextFieldErrors)
       setError('All fields are required')
       return
     }
@@ -33,7 +43,19 @@ export default function LoginPage() {
         throw new Error('No accessToken returned by server')
       }
       localStorage.setItem('token', token)
-      navigate('/dashboard')
+      const role = res?.data?.user?.role ?? (() => {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]))
+          return payload?.role
+        } catch {
+          return null
+        }
+      })()
+      if (role === 'SERVICE_PROVIDER') {
+        navigate('/provider-dashboard')
+      } else {
+        navigate('/dashboard')
+      }
     } catch (err) {
       const apiErr = err?.response?.data?.error
       const msg = apiErr
@@ -44,102 +66,118 @@ export default function LoginPage() {
       setIsSubmitting(false)
     }
   }
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCarouselIndex((i) => (i + 1) % images.length)
+    }, 3000)
+    return () => clearInterval(id)
+  }, [images.length])
+  // Fixed layout; avoid measuring inner elements to keep stable sizing
+
+  useEffect(() => {
+    const normalizedEmail = email.trim()
+    if (!normalizedEmail || !normalizedEmail.includes('@')) {
+      setDetectedRole(null)
+      return
+    }
+
+    let cancelled = false
+    const timeoutId = setTimeout(async () => {
+      try {
+        const res = await axiosClient.get('/api/auth/role', { params: { email: normalizedEmail } })
+        const role = res?.data?.role ?? null
+        if (!cancelled) setDetectedRole(role)
+      } catch {
+        if (!cancelled) setDetectedRole(null)
+      }
+    }, 400)
+
+    return () => {
+      cancelled = true
+      clearTimeout(timeoutId)
+    }
+  }, [email])
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#f7f7f7' }}>
-      <header style={{ background: '#4CAF50', color: '#fff', height: 64 }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0.75rem 1rem', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ fontWeight: 700, fontSize: 18 }}>PetCarePlus</div>
-          <nav style={{ display: 'flex', gap: '1rem', opacity: 0.95 }}>
-            <a href="#" style={{ color: '#fff', textDecoration: 'none' }}>Home</a>
-            <a href="#" style={{ color: '#fff', textDecoration: 'none' }}>Services</a>
-            <a href="#" style={{ color: '#fff', textDecoration: 'none' }}>About</a>
-            <a href="#" style={{ color: '#fff', textDecoration: 'none' }}>Contact us</a>
-          </nav>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <Link to="/register" style={{ padding: '0.5rem 0.9rem', borderRadius: 0, background: '#388E3C', color: '#fff', textDecoration: 'none', fontWeight: 600 }}>Register</Link>
-            <Link to="/" style={{ padding: '0.5rem 0.9rem', borderRadius: 0, background: '#66BB6A', color: '#fff', textDecoration: 'none' }}>Login</Link>
-          </div>
-        </div>
-      </header>
-      <div className="reg-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', height: 'calc(100vh - 64px)' }}>
-        <div className="left-panel" style={{ position: 'relative', height: '100%' }}>
-          <img src={happyAnimals} alt="Happy animals" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ background: 'rgba(76, 175, 80, 0.85)', padding: '1rem 1.25rem', borderRadius: 0, textAlign: 'center', color: '#fff' }}>
-              <div style={{ fontSize: 28, fontWeight: 800 }}>PetCare Plus</div>
-              <div style={{ marginTop: 6 }}>Welcome back — please sign in</div>
-              <div style={{ marginTop: 6, opacity: 0.9, fontSize: 12 }}>Grooming | Veterinary | Wellness</div>
+    <div className="loginPageRoot">
+      <div className="loginPageGrid">
+        <div className="loginLeftPanel">
+          <div className="loginImageCard">
+            {images.map((src, i) => (
+              <img key={i} src={src} alt="Background" className={`loginSlide ${carouselIndex === i ? 'loginSlideActive' : ''}`} />
+            ))}
+            <div className="loginLogo">PetCare+</div>
+            <div className="loginTagline">
+              <b>Book Pet Services with Ease</b>
+              <div className="loginTaglineSub">Grooming | Veterinary | Wellness</div>
+            </div>
+            <div className="loginDots">
+              <span className={`loginDot ${carouselIndex === 0 ? 'loginDotActive' : ''}`}></span>
+              <span className={`loginDot ${carouselIndex === 1 ? 'loginDotActive' : ''}`}></span>
+              <span className={`loginDot ${carouselIndex === 2 ? 'loginDotActive' : ''}`}></span>
             </div>
           </div>
         </div>
-        <div className="right-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', height: '100%' }}>
-          <div style={{ width: 520, flexShrink: 0, background: '#fff', borderRadius: 0, boxShadow: '0 8px 16px rgba(0,0,0,0.06)', border: '1px solid #e5e5e5', padding: '1.25rem' }}>
-            <div style={{ marginBottom: '0.75rem' }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: '#4CAF50' }}>Welcome Back</div>
-              <div style={{ color: '#6b6b6b', fontSize: 14 }}>Please sign in to continue</div>
-              <hr style={{ marginTop: '0.75rem', border: 0, height: 1, background: '#eee' }} />
+        <div className="loginRightPanel">
+          <div className="loginCard">
+            <div className="loginHeader">
+              <div className="loginTitle">Welcome Back</div>
+              <div className="loginSubtitle">Please sign in to continue</div>
+              <hr className="loginDivider" />
             </div>
-            {error && <div style={{ color: '#d32f2f', background: '#ffebee', borderRadius: 0, padding: '0.5rem 0.75rem', marginBottom: '0.75rem' }}>{error}</div>}
+            {error && <div className="loginError">{error}</div>}
             <form onSubmit={handleSubmit}>
-              <div style={{ marginBottom: '0.75rem' }}>
-                <label style={{ display: 'block', fontSize: 14, marginBottom: 4 }}>Email</label>
+              <div className="loginField">
+                <label className="loginLabel">Email</label>
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: 0, border: '1px solid #ddd', background: '#fff', color: '#000' }}
+                  className="loginInput"
                 />
-                {fieldErrors.email && <div style={{ color: '#d32f2f', fontSize: 12, marginTop: 4 }}>{fieldErrors.email}</div>}
+                {fieldErrors.email && <div className="loginFieldError">{fieldErrors.email}</div>}
               </div>
-              <div style={{ marginBottom: '0.75rem' }}>
-                <label style={{ display: 'block', fontSize: 14, marginBottom: 4 }}>Password</label>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <div className="loginField">
+                <label className="loginLabel">Password</label>
+                <div className="loginPasswordWrap">
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
-                    style={{ width: '100%', padding: '0.75rem', paddingRight: '48px', borderRadius: 0, border: '1px solid #ddd', background: '#fff', color: '#000' }}
+                    className="loginInput loginPasswordInput"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((s) => !s)}
-                    style={{ position: 'absolute', right: '10px', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    className="loginToggleBtn"
                     aria-label="Toggle password visibility"
                   >
-                    {showPassword ? 'Hide' : 'Show'}
+                    {showPassword ? '🙈' : '👁️'}
                   </button>
                 </div>
-                {fieldErrors.password && <div style={{ color: '#d32f2f', fontSize: 12, marginTop: 4 }}>{fieldErrors.password}</div>}
+                {fieldErrors.password && <div className="loginFieldError">{fieldErrors.password}</div>}
               </div>
+              {detectedRole && (
+                <div className="loginRoleHint">
+                  You are a <span className="loginRoleName">{roleLabel(detectedRole)}</span>
+                </div>
+              )}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                style={{
-                  marginTop: '0.5rem',
-                  width: '100%',
-                  padding: '0.9rem',
-                  borderRadius: 0,
-                  border: 'none',
-                  background: isSubmitting ? '#A5D6A7' : '#4CAF50',
-                  color: '#fff',
-                  fontWeight: 600,
-                  cursor: isSubmitting ? 'not-allowed' : 'pointer'
-                }}
+                className="loginSubmitBtn"
+                style={{ background: isSubmitting ? 'rgba(15, 133, 132, 0.6)' : 'rgba(15, 133, 132, 1)', cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
               >
-                {isSubmitting ? 'Logging in…' : 'Login'}
+                {isSubmitting ? '⏳ Logging in…' : 'Login'}
               </button>
+              <div className="loginRegisterLinkWrap">Dont have an account? 
+                <Link to="/register" className="loginRegisterLink">      Register here</Link>
+              </div>
             </form>
           </div>
         </div>
       </div>
-      <style>{`
-        @media (max-width: 768px) {
-          .reg-grid { grid-template-columns: 1fr; }
-          .left-panel { display: none; }
-        }
-      `}</style>
     </div>
   )
 }

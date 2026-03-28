@@ -1,5 +1,5 @@
 // This page shows a welcome message, user email from the JWT, and logout
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 function getEmailFromToken(token) {
@@ -12,12 +12,11 @@ function getEmailFromToken(token) {
 }
 
 export default function DashboardPage() {
-  const [email, setEmail] = useState('')
-  const navigate = useNavigate()
-  useEffect(() => {
+  const [email] = useState(() => {
     const token = localStorage.getItem('token')
-    setEmail(token ? getEmailFromToken(token) : '')
-  }, [])
+    return token ? getEmailFromToken(token) : ''
+  })
+  const navigate = useNavigate()
 
   const logout = () => {
     localStorage.removeItem('token')
@@ -26,7 +25,7 @@ export default function DashboardPage() {
 
   return (
     <div style={{ maxWidth: 600, margin: '2rem auto' }}>
-      <h2>Welcome to PetCarePlus!</h2>
+      <h2>Welcome to PetCare+</h2>
       <p>{email ? `Logged in as: ${email}` : ''}</p>
       <button onClick={logout} style={{ marginTop: '1rem' }}>Logout</button>
     </div>

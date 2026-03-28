@@ -7,13 +7,23 @@ import PetOwnerDashboard from './pages/PetOwnerDashboard.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
 import BookService_SelectService from './pages/BookService_SelectService.jsx'
+import BookService_ChooseSchedule from './pages/BookService_ChooseSchedule.jsx'
 import MyBookings from './pages/MyBookings.jsx'
+import ServiceProviderDashboard from './pages/ServiceProviderDashboard.jsx'
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route
+        path="/provider-dashboard"
+        element={
+          <ProtectedRoute>
+            <ServiceProviderDashboard />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/dashboard"
         element={
@@ -35,6 +45,14 @@ function App() {
         element={
           <ProtectedRoute>
             <BookService_SelectService />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/book-service/choose-schedule"
+        element={
+          <ProtectedRoute>
+            <BookService_ChooseSchedule />
           </ProtectedRoute>
         }
       />

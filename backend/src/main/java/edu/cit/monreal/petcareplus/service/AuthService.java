@@ -43,13 +43,14 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        Optional<User> existing = userRepository.findByEmail(request.getEmail());
+        String normalizedEmail = request.getEmail().trim().toLowerCase();
+        Optional<User> existing = userRepository.findByEmailIgnoreCase(normalizedEmail);
         if (existing.isPresent()) {
             throw new ApiException("DB-002", "Duplicate entry", "Email already registered", HttpStatus.CONFLICT);
         }
 
         User user = User.builder()
-                .email(request.getEmail())
+                .email(normalizedEmail)
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
                 .build();
@@ -97,7 +98,8 @@ public class AuthService {
 
     @Transactional
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
+        String normalizedEmail = request.getEmail().trim().toLowerCase();
+        User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
                 .orElseThrow(() -> new ApiException("AUTH-001", "Invalid credentials", "Email or password is incorrect", HttpStatus.UNAUTHORIZED));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
@@ -142,5 +144,13 @@ public class AuthService {
     @Transactional
     public void logout(String token) {
         refreshTokenRepository.findByToken(token).ifPresent(rt -> refreshTokenRepository.delete(rt));
+    }
+
+    @Transactional(readOnly = true)
+    public String lookupRoleByEmail(String email) {
+        if (email == null) return null;
+        String normalizedEmail = email.trim().toLowerCase();
+        if (normalizedEmail.isBlank()) return null;
+        return userRepository.findByEmailIgnoreCase(normalizedEmail).map(User::getRole).orElse(null);
     }
 }

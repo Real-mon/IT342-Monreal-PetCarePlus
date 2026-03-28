@@ -6,7 +6,18 @@ export default function PetOwnerDashboard() {
   const navigate = useNavigate()
   useEffect(() => {
     const token = localStorage.getItem('token')
-    if (!token) navigate('/', { replace: true })
+    if (!token) {
+      navigate('/', { replace: true })
+      return
+    }
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      if (payload?.role === 'SERVICE_PROVIDER') {
+        navigate('/provider-dashboard', { replace: true })
+      }
+    } catch {
+      // ignore decode errors
+    }
   }, [navigate])
 
   const logout = () => {
@@ -37,7 +48,7 @@ export default function PetOwnerDashboard() {
     <div style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', background: '#f5f5f5' }}>
       {/* Top Navbar */}
       <div style={{ background: '#111', color: '#fff', height: 60, display: 'flex', alignItems: 'center', padding: '0 12px' }}>
-        <div style={{ background: '#1b1b1b', padding: '8px 12px', fontWeight: 700 }}>PetCare Plus</div>
+        <div style={{ background: '#1b1b1b', padding: '8px 12px', fontWeight: 700 }}>PetCare+</div>
         <div style={{ marginLeft: 16, flex: 1, display: 'flex', justifyContent: 'center' }}>
           <div style={{ display: 'flex', background: '#222', borderRadius: 0 }}>
             <Link to="/dashboard" style={{ padding: '8px 12px', color: '#fff', textDecoration: 'none', background: '#000' }}>Dashboard</Link>
