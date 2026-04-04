@@ -3,9 +3,23 @@ package edu.cit.monreal.petcareplus;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @SpringBootApplication
+@RestController
 public class PetCarePlusApplication {
+    @GetMapping("/")
+    public Map<String, Object> root() {
+        return Map.of(
+                "success", true,
+                "message", "PetCare+ API is running",
+                "docs", "/swagger-ui.html"
+        );
+    }
+
     public static void main(String[] args) {
         String configuredUrl = System.getProperty("spring.datasource.url");
         if (configuredUrl == null || configuredUrl.isBlank()) configuredUrl = System.getenv("SPRING_DATASOURCE_URL");

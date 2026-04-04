@@ -17,6 +17,7 @@ export default function DashboardPage() {
     return token ? getEmailFromToken(token) : ''
   })
   const navigate = useNavigate()
+  const primary = 'rgba(15, 133, 132, 1)'
 
   const logout = () => {
     localStorage.removeItem('token')
@@ -24,10 +25,15 @@ export default function DashboardPage() {
   }
 
   return (
-    <div style={{ maxWidth: 600, margin: '2rem auto' }}>
-      <h2>Welcome to PetCare+</h2>
+    <div style={{ maxWidth: 600, margin: '2rem auto', padding: '0 16px' }}>
+      <h2 style={{ color: primary, marginBottom: 8 }}>Welcome to PetCare+</h2>
       <p>{email ? `Logged in as: ${email}` : ''}</p>
-      <button onClick={logout} style={{ marginTop: '1rem' }}>Logout</button>
+      <button
+        onClick={logout}
+        style={{ marginTop: '1rem', background: primary, color: '#fff', border: 'none', padding: '10px 14px', cursor: 'pointer', borderRadius: 10, fontWeight: 700 }}
+      >
+        Logout
+      </button>
     </div>
   )
 }

@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom'
 
 export default function PetOwnerDashboard() {
   const navigate = useNavigate()
+  const primary = 'rgba(15, 133, 132, 1)'
+  const primarySoft = 'rgba(15, 133, 132, 0.12)'
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) {
@@ -51,7 +53,7 @@ export default function PetOwnerDashboard() {
         <div style={{ background: '#1b1b1b', padding: '8px 12px', fontWeight: 700 }}>PetCare+</div>
         <div style={{ marginLeft: 16, flex: 1, display: 'flex', justifyContent: 'center' }}>
           <div style={{ display: 'flex', background: '#222', borderRadius: 0 }}>
-            <Link to="/dashboard" style={{ padding: '8px 12px', color: '#fff', textDecoration: 'none', background: '#000' }}>Dashboard</Link>
+            <Link to="/dashboard" style={{ padding: '8px 12px', color: '#fff', textDecoration: 'none', background: primary }}>Dashboard</Link>
             <Link to="/bookings" style={{ padding: '8px 12px', color: '#ddd', textDecoration: 'none' }}>My Bookings</Link>
             <Link to="/book-service" style={{ padding: '8px 12px', color: '#ddd', textDecoration: 'none' }}>Book Service</Link>
             <Link to="/profile" style={{ padding: '8px 12px', color: '#ddd', textDecoration: 'none' }}>Profile</Link>
@@ -75,7 +77,7 @@ export default function PetOwnerDashboard() {
             </div>
           </div>
           <nav style={{ display: 'flex', flexDirection: 'column' }}>
-            <Link to="/dashboard" style={{ padding: '10px 8px', textDecoration: 'none', color: '#000', borderLeft: '4px solid #222', background: '#ddd' }}>Dashboard</Link>
+            <Link to="/dashboard" style={{ padding: '10px 8px', textDecoration: 'none', color: '#000', borderLeft: `4px solid ${primary}`, background: primarySoft }}>Dashboard</Link>
             <Link to="/bookings" style={{ padding: '10px 8px', textDecoration: 'none', color: '#000' }}>My Bookings</Link>
             <Link to="/book-service" style={{ padding: '10px 8px', textDecoration: 'none', color: '#000' }}>Book Service</Link>
             <Link to="/profile" style={{ padding: '10px 8px', textDecoration: 'none', color: '#000' }}>Profile</Link>
@@ -151,16 +153,16 @@ export default function PetOwnerDashboard() {
 
             {/* Quick Actions */}
             <div>
-              <button style={{ width: '100%', background: '#111', color: '#fff', border: 'none', padding: '12px 14px', textAlign: 'left', display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+              <button style={{ width: '100%', background: primary, color: '#fff', border: 'none', padding: '12px 14px', textAlign: 'left', display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                 <span>Book a Service</span><span>&gt;</span>
               </button>
-              <button style={{ width: '100%', background: '#111', color: '#fff', border: 'none', padding: '12px 14px', textAlign: 'left', display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+              <button style={{ width: '100%', background: primary, color: '#fff', border: 'none', padding: '12px 14px', textAlign: 'left', display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                 <span>View All Bookings</span><span>&gt;</span>
               </button>
-              <button style={{ width: '100%', background: '#111', color: '#fff', border: 'none', padding: '12px 14px', textAlign: 'left', display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+              <button style={{ width: '100%', background: primary, color: '#fff', border: 'none', padding: '12px 14px', textAlign: 'left', display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                 <span>Update Profile</span><span>&gt;</span>
               </button>
-              <button style={{ width: '100%', background: '#111', color: '#fff', border: 'none', padding: '12px 14px', textAlign: 'left', display: 'flex', justifyContent: 'space-between' }}>
+              <button style={{ width: '100%', background: primary, color: '#fff', border: 'none', padding: '12px 14px', textAlign: 'left', display: 'flex', justifyContent: 'space-between' }}>
                 <span>Notifications</span><span>&gt;</span>
               </button>
             </div>

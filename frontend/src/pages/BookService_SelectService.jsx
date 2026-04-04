@@ -112,8 +112,8 @@ export default function BookService_SelectService() {
                 style={{
                   padding: '10px 14px',
                   borderRadius: 9999,
-                  border: category === 'GROOMING' ? '1px solid #0d9488' : '1px solid #d1d5db',
-                  background: category === 'GROOMING' ? '#0d9488' : '#fff',
+                  border: category === 'GROOMING' ? '1px solid rgba(15, 133, 132, 1)' : '1px solid #d1d5db',
+                  background: category === 'GROOMING' ? 'rgba(15, 133, 132, 1)' : '#fff',
                   color: category === 'GROOMING' ? '#fff' : '#6b7280',
                   cursor: 'pointer',
                   fontWeight: 600,
@@ -127,8 +127,8 @@ export default function BookService_SelectService() {
                 style={{
                   padding: '10px 14px',
                   borderRadius: 9999,
-                  border: category === 'VETERINARY' ? '1px solid #0d9488' : '1px solid #d1d5db',
-                  background: category === 'VETERINARY' ? '#0d9488' : '#fff',
+                  border: category === 'VETERINARY' ? '1px solid rgba(15, 133, 132, 1)' : '1px solid #d1d5db',
+                  background: category === 'VETERINARY' ? 'rgba(15, 133, 132, 1)' : '#fff',
                   color: category === 'VETERINARY' ? '#fff' : '#6b7280',
                   cursor: 'pointer',
                   fontWeight: 600,
@@ -156,7 +156,7 @@ export default function BookService_SelectService() {
                         onClick={() => onSelectProvider(p.name)}
                         style={{
                           marginTop: 10,
-                          background: '#0d9488',
+                          background: 'rgba(15, 133, 132, 1)',
                           color: '#fff',
                           border: 'none',
                           borderRadius: 8,
@@ -187,7 +187,7 @@ export default function BookService_SelectService() {
               z-index: 0;
             }
             .bsStepBox { min-width: 0; }
-            .bsProviderGrid button:hover { background: #0b7f76; }
+            .bsProviderGrid button:hover { background: rgba(15, 133, 132, 0.9); }
             @media (max-width: 768px) {
               .bsSidebar { display: none; }
               .bsProviderGrid { grid-template-columns: 1fr !important; }

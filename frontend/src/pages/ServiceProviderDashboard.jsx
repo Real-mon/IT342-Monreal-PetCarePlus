@@ -12,6 +12,8 @@ function decodeToken(token) {
 
 export default function ServiceProviderDashboard() {
   const navigate = useNavigate()
+  const primary = 'rgba(15, 133, 132, 1)'
+  const primarySoft = 'rgba(15, 133, 132, 0.12)'
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -57,19 +59,19 @@ export default function ServiceProviderDashboard() {
 
   return (
     <div style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', background: '#f5f5f5' }}>
-      <div style={{ background: '#3a3a3a', color: '#fff', height: 60, display: 'flex', alignItems: 'center', padding: '0 12px' }}>
-        <div style={{ background: '#2b2b2b', padding: '8px 12px', fontWeight: 700 }}>PetCare+</div>
+      <div style={{ background: '#111', color: '#fff', height: 60, display: 'flex', alignItems: 'center', padding: '0 12px' }}>
+        <div style={{ background: '#1b1b1b', padding: '8px 12px', fontWeight: 700 }}>PetCare+</div>
         <div style={{ marginLeft: 16, flex: 1, display: 'flex', justifyContent: 'center' }}>
-          <div style={{ display: 'flex', background: '#4a4a4a', borderRadius: 0 }}>
-            <Link to="/provider-dashboard" style={{ padding: '8px 12px', color: '#fff', textDecoration: 'none', background: '#000' }}>Dashboard</Link>
+          <div style={{ display: 'flex', background: '#222', borderRadius: 0 }}>
+            <Link to="/provider-dashboard" style={{ padding: '8px 12px', color: '#fff', textDecoration: 'none', background: primary }}>Dashboard</Link>
             <Link to="/bookings" style={{ padding: '8px 12px', color: '#eee', textDecoration: 'none' }}>My Bookings</Link>
             <Link to="/provider-dashboard#services" style={{ padding: '8px 12px', color: '#eee', textDecoration: 'none' }}>My Services</Link>
             <Link to="/profile" style={{ padding: '8px 12px', color: '#eee', textDecoration: 'none' }}>Profile</Link>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button aria-label="Search" style={{ width: 36, height: 36, background: '#2b2b2b', border: '1px solid #444', color: '#fff', cursor: 'pointer' }}>🔍</button>
-          <div style={{ width: 36, height: 36, background: '#2b2b2b', border: '1px solid #444', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>J</div>
+          <button aria-label="Search" style={{ width: 36, height: 36, background: '#222', border: '1px solid #333', color: '#fff', cursor: 'pointer' }}>🔍</button>
+          <div style={{ width: 36, height: 36, background: '#222', border: '1px solid #333', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>J</div>
         </div>
       </div>
 
@@ -83,7 +85,7 @@ export default function ServiceProviderDashboard() {
             </div>
           </div>
           <nav style={{ display: 'flex', flexDirection: 'column' }}>
-            <Link to="/provider-dashboard" style={{ padding: '10px 8px', textDecoration: 'none', color: '#000', borderLeft: '4px solid #3a3a3a', background: '#e8e8e8' }}>Dashboard</Link>
+            <Link to="/provider-dashboard" style={{ padding: '10px 8px', textDecoration: 'none', color: '#000', borderLeft: `4px solid ${primary}`, background: primarySoft }}>Dashboard</Link>
             <Link to="/bookings" style={{ padding: '10px 8px', textDecoration: 'none', color: '#000' }}>Bookings</Link>
             <Link to="/provider-dashboard#services" style={{ padding: '10px 8px', textDecoration: 'none', color: '#000' }}>My Services</Link>
             <Link to="/provider-dashboard#schedule" style={{ padding: '10px 8px', textDecoration: 'none', color: '#000' }}>Schedule</Link>
@@ -149,7 +151,7 @@ export default function ServiceProviderDashboard() {
               <div style={{ border: '1px solid #e5e5e5' }}>
                 {schedule.map((s, idx) => (
                   <div key={idx} style={{ display: 'grid', gridTemplateColumns: '100px 1fr', alignItems: 'center', padding: '10px 8px', borderTop: idx === 0 ? 'none' : '1px solid #eee', background: '#f9f9f9' }}>
-                    <div style={{ background: '#3a3a3a', color: '#fff', textAlign: 'center', padding: '8px 6px', width: 84, justifySelf: 'start' }}>{s.time}</div>
+                    <div style={{ background: primary, color: '#fff', textAlign: 'center', padding: '8px 6px', width: 84, justifySelf: 'start' }}>{s.time}</div>
                     <div>
                       <div style={{ fontWeight: 700 }}>{s.client}</div>
                       <div style={{ color: '#777', fontSize: 13 }}>{s.service}</div>

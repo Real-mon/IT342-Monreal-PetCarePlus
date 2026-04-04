@@ -13,13 +13,12 @@ export default function RegisterPage() {
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [role] = useState('PET_OWNER')
+  const [role, setRole] = useState('PET_OWNER')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [fieldErrors, setFieldErrors] = useState({})
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [agree, setAgree] = useState(false)
   const [carouselIndex, setCarouselIndex] = useState(0)
   const images = [happyAnimals, happyAnimals1, happyAnimals2]
   const navigate = useNavigate()
@@ -37,10 +36,6 @@ export default function RegisterPage() {
       if (!password) nextFieldErrors.password = 'Password is required'
       setFieldErrors(nextFieldErrors)
       setError('All fields are required')
-      return
-    }
-    if (!agree) {
-      setError('You must agree to the Terms & Conditions')
       return
     }
     try {
@@ -140,11 +135,24 @@ export default function RegisterPage() {
                 </div>
                 {fieldErrors.password && <div className="registerFieldError">{fieldErrors.password}</div>}
               </div>
-              <div className="registerCheckboxRow">
-                <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-                <span className="registerAgreeText">
-                  I agree to the <a href="#" onClick={(e) => e.preventDefault()} className="registerLink">Terms &amp; Conditions</a>
-                </span>
+              <div className="registerField">
+                <div className="registerRoleLabel">Account Type</div>
+                <div className="registerRoleToggle">
+                  <button
+                    type="button"
+                    className={`registerRoleBtn ${role === 'PET_OWNER' ? 'registerRoleBtnActive' : ''}`}
+                    onClick={() => setRole('PET_OWNER')}
+                  >
+                    Pet Owner
+                  </button>
+                  <button
+                    type="button"
+                    className={`registerRoleBtn ${role === 'SERVICE_PROVIDER' ? 'registerRoleBtnActive' : ''}`}
+                    onClick={() => setRole('SERVICE_PROVIDER')}
+                  >
+                    Service Provider
+                  </button>
+                </div>
               </div>
               <button type="submit" disabled={isSubmitting} className="registerPrimaryBtn">
                 {isSubmitting ? 'Creating Account…' : 'Create Account'}
