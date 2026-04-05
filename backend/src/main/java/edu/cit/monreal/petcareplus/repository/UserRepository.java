@@ -1,4 +1,4 @@
-// This repository provides database operations for the User entity
+// Spring Data JPA repository for User entity
 package edu.cit.monreal.petcareplus.repository;
 
 import edu.cit.monreal.petcareplus.model.User;
@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
+    Optional<User> findByEmailIgnoreCase(String email);
 }

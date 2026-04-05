@@ -1,0 +1,249 @@
+.loginPageRoot {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding: 24px;
+}
+
+.loginPageGrid {
+  display: grid;
+  grid-template-columns: 60% 40%;
+  column-gap: 1px;
+  flex: 1;
+  min-height: calc(100vh - 48px);
+  width: 100%;
+}
+
+.loginLeftPanel {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+.loginImageCard {
+  position: relative;
+  width: 100%;
+  height: 90%;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.loginSlide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 600ms ease;
+}
+
+.loginSlideActive {
+  opacity: 1;
+}
+
+.loginLogo {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.loginBackBtn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  padding: 8px 12px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  cursor: pointer;
+}
+
+.loginTagline {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 16px;
+  color: #fff;
+  opacity: 0.95;
+  z-index: 2;
+  width: 80%;
+  text-align: center;
+}
+
+.loginTaglineSub {
+  margin-top: 6px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 400;
+}
+
+.loginDots {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.loginDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.loginDotActive {
+  background: #fff;
+}
+
+.loginRightPanel {
+  display: flex;
+  margin-left: 50px;
+  margin-right: 50px;
+  align-items: center;
+  justify-content: center;
+}
+
+.loginCard {
+  width: 100%;
+  height: 90%;
+}
+
+.loginHeader {
+  margin-bottom: 16px;
+}
+
+.loginTitle {
+  font-size: 40px;
+  font-weight: 800;
+  color: rgba(15, 133, 132, 1);
+  margin-bottom: 8px;
+}
+
+.loginSubtitle {
+  color: #6b6b6b;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.loginDivider {
+  margin-top: 12px;
+  border: 0;
+  height: 1px;
+  background: #eee;
+}
+
+.loginError {
+  color: #d32f2f;
+  background: #ffebee;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.loginField {
+  margin-top: 16px;
+}
+
+.loginLabel {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.loginInput {
+  width: 100%;
+  height: 48px;
+  box-sizing: border-box;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #000;
+}
+
+.loginPasswordWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.loginPasswordInput {
+  padding-right: 40px;
+}
+
+.loginFieldError {
+  color: #d32f2f;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.loginToggleBtn {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loginRoleHint {
+  margin-top: 10px;
+  color: #6b6b6b;
+  font-size: 14px;
+}
+
+.loginRoleName {
+  font-weight: 800;
+  color: rgba(15, 133, 132, 1);
+}
+
+.loginSubmitBtn {
+  margin-top: 12px;
+  margin-bottom: 5px;
+  width: 100%;
+  height: 52px;
+  border-radius: 12px;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+}
+
+.loginRegisterLinkWrap {
+  margin-top: 5px;
+  text-align: end;
+  color: #6b6b6b;
+  font-size: 14px;
+}
+
+.loginRegisterLink {
+  color: rgba(15, 133, 132, 1);
+  text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .loginPageGrid {
+    grid-template-columns: 1fr;
+    row-gap: 24px;
+  }
+  .loginRightPanel {
+    order: 1;
+  }
+  .loginLeftPanel {
+    order: 2;
+    height: 40vh;
+  }
+}

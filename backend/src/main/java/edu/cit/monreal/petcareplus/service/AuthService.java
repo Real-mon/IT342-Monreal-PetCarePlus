@@ -1,56 +1,156 @@
-// This service handles user registration, password hashing, login, and JWT generation
+// Business logic for authentication: register, login, logout
 package edu.cit.monreal.petcareplus.service;
 
-import edu.cit.monreal.petcareplus.dto.AuthResponse;
-import edu.cit.monreal.petcareplus.dto.LoginRequest;
-import edu.cit.monreal.petcareplus.dto.RegisterRequest;
-import edu.cit.monreal.petcareplus.exception.DuplicateEmailException;
-import edu.cit.monreal.petcareplus.model.User;
-import edu.cit.monreal.petcareplus.repository.UserRepository;
+import edu.cit.monreal.petcareplus.dto.auth.*;
+import edu.cit.monreal.petcareplus.exception.ApiException;
+import edu.cit.monreal.petcareplus.model.*;
+import edu.cit.monreal.petcareplus.repository.*;
 import edu.cit.monreal.petcareplus.security.JwtUtil;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
 public class AuthService {
-
     private final UserRepository userRepository;
+    private final ProfileRepository profileRepository;
+    private final ServiceProviderRepository serviceProviderRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
+    @Value("${jwt.refresh-expiration:604800000}")
+    private long refreshExpirationMs;
+
     public AuthService(UserRepository userRepository,
+                       ProfileRepository profileRepository,
+                       ServiceProviderRepository serviceProviderRepository,
+                       RefreshTokenRepository refreshTokenRepository,
                        BCryptPasswordEncoder passwordEncoder,
                        JwtUtil jwtUtil) {
         this.userRepository = userRepository;
+        this.profileRepository = profileRepository;
+        this.serviceProviderRepository = serviceProviderRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
     }
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        Optional<User> existing = userRepository.findByEmail(request.getEmail());
+        String normalizedEmail = request.getEmail().trim().toLowerCase();
+        Optional<User> existing = userRepository.findByEmailIgnoreCase(normalizedEmail);
         if (existing.isPresent()) {
-            throw new DuplicateEmailException("Email already in use");
+            throw new ApiException("DB-002", "Duplicate entry", "Email already registered", HttpStatus.CONFLICT);
         }
-        User user = new User();
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        userRepository.save(user);
-        return new AuthResponse(null, "Registration successful!");
+
+        User user = User.builder()
+                .email(normalizedEmail)
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(request.getRole())
+                .build();
+        user = userRepository.save(user);
+
+        Profile profile = Profile.builder()
+                .user(user)
+                .fullName((request.getFirstname() + " " + request.getLastname()).trim())
+                .build();
+        profileRepository.save(profile);
+
+        if ("SERVICE_PROVIDER".equalsIgnoreCase(request.getRole())) {
+            ServiceProvider sp = ServiceProvider.builder()
+                    .user(user)
+                    .businessName(null)
+                    .description(null)
+                    .build();
+            serviceProviderRepository.save(sp);
+        }
+
+        String access = jwtUtil.generateAccessToken(user.getEmail(), user.getRole());
+        String refresh = jwtUtil.generateRefreshToken(user.getEmail());
+
+        RefreshToken refreshEntity = RefreshToken.builder()
+                .user(user)
+                .token(refresh)
+                .expiresAt(LocalDateTime.now().plusSeconds(refreshExpirationMs / 1000))
+                .build();
+        refreshTokenRepository.save(refreshEntity);
+
+        UserDto userDto = UserDto.builder()
+                .email(user.getEmail())
+                .firstname(request.getFirstname())
+                .lastname(request.getLastname())
+                .role(user.getRole())
+                .build();
+
+        return AuthResponse.builder()
+                .success(true)
+                .accessToken(access)
+                .refreshToken(refresh)
+                .user(userDto)
+                .build();
     }
 
+    @Transactional
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
+        String normalizedEmail = request.getEmail().trim().toLowerCase();
+        User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
+                .orElseThrow(() -> new ApiException("AUTH-001", "Invalid credentials", "Email or password is incorrect", HttpStatus.UNAUTHORIZED));
+
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new BadCredentialsException("Invalid email or password");
+            throw new ApiException("AUTH-001", "Invalid credentials", "Email or password is incorrect", HttpStatus.UNAUTHORIZED);
         }
-        String token = jwtUtil.generateToken(user.getEmail());
-        return new AuthResponse(token, "Login successful");
+
+        String access = jwtUtil.generateAccessToken(user.getEmail(), user.getRole());
+        String refresh = jwtUtil.generateRefreshToken(user.getEmail());
+
+        refreshTokenRepository.deleteByUserId(user.getId());
+        RefreshToken refreshEntity = RefreshToken.builder()
+                .user(user)
+                .token(refresh)
+                .expiresAt(LocalDateTime.now().plusSeconds(refreshExpirationMs / 1000))
+                .build();
+        refreshTokenRepository.save(refreshEntity);
+
+        String firstname = null;
+        String lastname = null;
+        Optional<Profile> p = profileRepository.findByUserId(user.getId());
+        if (p.isPresent() && p.get().getFullName() != null) {
+            String[] parts = p.get().getFullName().trim().split(" ", 2);
+            firstname = parts.length > 0 ? parts[0] : null;
+            lastname = parts.length > 1 ? parts[1] : null;
+        }
+
+        UserDto userDto = UserDto.builder()
+                .email(user.getEmail())
+                .firstname(firstname)
+                .lastname(lastname)
+                .role(user.getRole())
+                .build();
+
+        return AuthResponse.builder()
+                .success(true)
+                .accessToken(access)
+                .refreshToken(refresh)
+                .user(userDto)
+                .build();
+    }
+
+    @Transactional
+    public void logout(String token) {
+        refreshTokenRepository.findByToken(token).ifPresent(rt -> refreshTokenRepository.delete(rt));
+    }
+
+    @Transactional(readOnly = true)
+    public String lookupRoleByEmail(String email) {
+        if (email == null) return null;
+        String normalizedEmail = email.trim().toLowerCase();
+        if (normalizedEmail.isBlank()) return null;
+        return userRepository.findByEmailIgnoreCase(normalizedEmail).map(User::getRole).orElse(null);
     }
 }
