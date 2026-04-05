@@ -1,0 +1,11 @@
+# Ignore Java compiled files
+**/target/
+**/*.class
+
+# Ignore Maven wrapper and junk
+.mvn/
+mvnw
+mvnw.cmd
+
+# Ignore Node modules
+**/node_modules/
