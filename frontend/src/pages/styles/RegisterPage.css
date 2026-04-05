@@ -176,19 +176,24 @@
 }
 
 .registerRoleToggle {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
 .registerRoleBtn {
-  padding: 10px 14px;
-  border-radius: 9999px;
-  border: 1px solid #d1d5db;
+  height: 48px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
   background: #fff;
-  color: #6b7280;
+  color: #000;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 500;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .registerRoleBtnActive {
@@ -201,6 +206,10 @@
   background: rgba(15, 133, 132, 0.08);
   border-color: rgba(15, 133, 132, 1);
   color: #111827;
+}
+
+.registerRoleBtn:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
 }
 
 .registerLabel {

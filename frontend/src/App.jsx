@@ -1,15 +1,15 @@
 // This file defines app routes for login, registration, and protected pages
 import './App.css'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import LoginPage from './pages/LoginPage.jsx'
-import RegisterPage from './pages/RegisterPage.jsx'
-import PetOwnerDashboard from './pages/PetOwnerDashboard.jsx'
+import LoginPage from './pages/2_LoginPage.jsx'
+import RegisterPage from './pages/1_RegisterPage.jsx'
+import PetOwnerDashboard from './pages/3_PetOwnerDashboard.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
-import ProfilePage from './pages/ProfilePage.jsx'
-import BookService_SelectService from './pages/BookService_SelectService.jsx'
-import BookService_ChooseSchedule from './pages/BookService_ChooseSchedule.jsx'
-import MyBookings from './pages/MyBookings.jsx'
-import ServiceProviderDashboard from './pages/ServiceProviderDashboard.jsx'
+import ProfilePage from './pages/5_ProfilePage.jsx'
+import BookService_SelectService from './pages/6_BookService_SelectService.jsx'
+import BookService_ChooseSchedule from './pages/7_BookService_ChooseSchedule.jsx'
+import MyBookings from './pages/10_MyBookings.jsx'
+import ServiceProviderDashboard from './pages/4_ServiceProviderDashboard.jsx'
 
 function App() {
   return (
