@@ -32,3 +32,5 @@ Database: Supabase (PostgreSQL)
 
 ## Swagger UI
 - Visit http://localhost:8080/swagger-ui.html to explore the API (when backend is running).
+
+---
