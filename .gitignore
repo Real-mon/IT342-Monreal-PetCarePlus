@@ -1,11 +1,41 @@
-# Ignore Java compiled files
-**/target/
-**/*.class
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Ignore Maven wrapper and junk
-.mvn/
-mvnw
-mvnw.cmd
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+*.local
 
-# Ignore Node modules
-**/node_modules/
+backend/target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+
+.env
+.env.local
+.env.development
+.env.production
+backend/.env
+frontend/.env
+
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+Thumbs.db
+.DS_Store
+
+# Android Studio / Gradle local config
+**/local.properties

@@ -1,0 +1,4 @@
+<!-- This file contains app string resources -->
+<resources>
+    <string name="app_name">PetCare Plus</string>
+</resources>
