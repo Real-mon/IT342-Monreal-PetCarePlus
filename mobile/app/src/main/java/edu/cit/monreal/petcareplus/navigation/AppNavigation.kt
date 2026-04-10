@@ -1,4 +1,4 @@
-// This file centralizes all Navigation routes and the NavHost setup
+// This file defines all app routes and sets up the NavHost for Login/Register/Dashboard screens
 package edu.cit.monreal.petcareplus.navigation
 
 import androidx.compose.runtime.Composable

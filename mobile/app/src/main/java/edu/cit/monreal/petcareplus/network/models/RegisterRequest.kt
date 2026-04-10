@@ -1,4 +1,4 @@
-// This file defines the request body for registration endpoint
+// This file defines the request body for the register endpoint
 package edu.cit.monreal.petcareplus.network.models
 
 data class RegisterRequest(
@@ -6,5 +6,5 @@ data class RegisterRequest(
     val lastname: String,
     val email: String,
     val password: String,
-    val role: String // "PET_OWNER" or "SERVICE_PROVIDER"
+    val role: String
 )

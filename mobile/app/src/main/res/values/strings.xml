@@ -1,4 +1,3 @@
-<!-- This file contains app string resources -->
 <resources>
-    <string name="app_name">PetCare Plus</string>
+    <string name="app_name">PetCarePlus</string>
 </resources>

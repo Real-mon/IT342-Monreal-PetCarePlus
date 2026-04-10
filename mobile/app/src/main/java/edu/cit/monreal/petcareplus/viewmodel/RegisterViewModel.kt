@@ -1,53 +1,51 @@
-// This file implements registration logic using MVVM and coroutines
+// This file holds registration UI state and performs the register API call using MVVM
 package edu.cit.monreal.petcareplus.viewmodel
 
 import android.content.Context
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.cit.monreal.petcareplus.network.RetrofitClient
 import edu.cit.monreal.petcareplus.network.models.RegisterRequest
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class RegisterViewModel : ViewModel() {
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading
+    var isLoading by mutableStateOf(false)
+        private set
 
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage
+    var errorMessage by mutableStateOf<String?>(null)
+        private set
 
-    private val _successMessage = MutableStateFlow<String?>(null)
-    val successMessage: StateFlow<String?> = _successMessage
+    var successMessage by mutableStateOf<String?>(null)
+        private set
 
-    fun register(context: Context, request: RegisterRequest, onSuccess: () -> Unit) {
-        _errorMessage.value = null
-        _successMessage.value = null
-        _isLoading.value = true
+    fun register(context: Context, request: RegisterRequest) {
+        errorMessage = null
+        successMessage = null
+        isLoading = true
         viewModelScope.launch {
             try {
-                val api = RetrofitClient.create(context)
+                val api = RetrofitClient.api(context)
                 val res = api.register(request)
+                val body = res.body()
                 if (res.isSuccessful) {
-                    val body = res.body()
-                    if (body?.success == true) {
-                        _successMessage.value = "Registration successful! Redirecting..."
-                        onSuccess()
+                    val code = body?.error?.code
+                    if (body?.success == true || code == null) {
+                        successMessage = "Registration successful! Redirecting..."
+                    } else if (code == "DB-002") {
+                        errorMessage = "This email is already registered"
                     } else {
-                        val code = body?.error?.code
-                        _errorMessage.value = if (code == "DB-002") {
-                            "This email is already registered"
-                        } else {
-                            "Something went wrong. Please try again."
-                        }
+                        errorMessage = "Something went wrong. Please try again."
                     }
                 } else {
-                    _errorMessage.value = "Something went wrong. Please try again."
+                    errorMessage = "Something went wrong. Please try again."
                 }
             } catch (e: Exception) {
-                _errorMessage.value = "Something went wrong. Please try again."
+                errorMessage = "Something went wrong. Please try again."
             } finally {
-                _isLoading.value = false
+                isLoading = false
             }
         }
     }

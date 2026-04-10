@@ -1,4 +1,4 @@
-// This file defines the request body for login endpoint
+// This file defines the request body for the login endpoint
 package edu.cit.monreal.petcareplus.network.models
 
 data class LoginRequest(

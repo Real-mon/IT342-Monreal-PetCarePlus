@@ -1,4 +1,4 @@
-// This file declares the Retrofit API endpoints for registration and login
+// This file defines Retrofit endpoints for authentication
 package edu.cit.monreal.petcareplus.network
 
 import edu.cit.monreal.petcareplus.network.models.AuthResponse

@@ -1,8 +1,6 @@
-// This file provides helper functions for saving and retrieving auth data via DataStore Preferences
 package edu.cit.monreal.petcareplus.datastore
 
 import android.content.Context
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -13,11 +11,11 @@ private val Context.dataStore by preferencesDataStore(name = "petcareplus_prefs"
 
 object TokenDataStore {
     private val KEY_TOKEN = stringPreferencesKey("access_token")
-    private val KEY_ROLE = stringPreferencesKey("user_role")
-    private val KEY_EMAIL = stringPreferencesKey("user_email")
+    private val KEY_ROLE = stringPreferencesKey("role")
+    private val KEY_EMAIL = stringPreferencesKey("email")
 
     suspend fun saveToken(context: Context, token: String) {
-        context.dataStore.edit { prefs -> prefs[KEY_TOKEN] = token }
+        context.dataStore.edit { it[KEY_TOKEN] = token }
     }
 
     suspend fun getToken(context: Context): String? {
@@ -25,7 +23,7 @@ object TokenDataStore {
     }
 
     suspend fun saveRole(context: Context, role: String) {
-        context.dataStore.edit { prefs -> prefs[KEY_ROLE] = role }
+        context.dataStore.edit { it[KEY_ROLE] = role }
     }
 
     suspend fun getRole(context: Context): String? {
@@ -33,18 +31,24 @@ object TokenDataStore {
     }
 
     suspend fun saveUserEmail(context: Context, email: String) {
-        context.dataStore.edit { prefs -> prefs[KEY_EMAIL] = email }
+        context.dataStore.edit { it[KEY_EMAIL] = email }
     }
 
     suspend fun getUserEmail(context: Context): String? {
         return context.dataStore.data.map { it[KEY_EMAIL] }.first()
     }
 
+    // Option 1: Clear specific keys
     suspend fun clearAll(context: Context) {
-        context.dataStore.edit { prefs: Preferences ->
+        context.dataStore.edit { prefs ->
             prefs.remove(KEY_TOKEN)
             prefs.remove(KEY_ROLE)
             prefs.remove(KEY_EMAIL)
         }
+    }
+
+    // Option 2: Wipe everything in this DataStore (Shorter/Cleaner)
+    suspend fun clearEverything(context: Context) {
+        context.dataStore.edit { it.clear() }
     }
 }

@@ -1,9 +1,9 @@
-// This file provides a singleton Retrofit client with logging and auth interceptors
+// This file builds a Retrofit client with logging and attaches the auth token if available
 package edu.cit.monreal.petcareplus.network
 
 import android.content.Context
-import edu.cit.monreal.petcareplus.utils.Constants
 import edu.cit.monreal.petcareplus.datastore.TokenDataStore
+import edu.cit.monreal.petcareplus.utils.Constants
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -12,26 +12,21 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    // Logging interceptor for debugging HTTP requests/responses
-    private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
-    }
-
-    // Auth interceptor that attaches Bearer token from DataStore
     private fun authInterceptor(context: Context) = Interceptor { chain ->
         val original = chain.request()
         val token = runBlocking { TokenDataStore.getToken(context) }
-        val newReq = if (!token.isNullOrBlank()) {
+        val req = if (!token.isNullOrBlank()) {
             original.newBuilder()
                 .addHeader("Authorization", "Bearer $token")
                 .build()
         } else original
-        chain.proceed(newReq)
+        chain.proceed(req)
     }
 
-    fun create(context: Context): ApiService {
+    fun api(context: Context): ApiService {
+        val logging = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
         val okHttp = OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
+            .addInterceptor(logging)
             .addInterceptor(authInterceptor(context))
             .build()
 

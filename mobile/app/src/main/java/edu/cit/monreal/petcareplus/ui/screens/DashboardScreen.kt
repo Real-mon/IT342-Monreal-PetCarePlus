@@ -1,66 +1,43 @@
-// This file renders the Dashboard screen with welcome info and logout behavior
+// This file renders a simple dashboard screen after login
 package edu.cit.monreal.petcareplus.ui.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import edu.cit.monreal.petcareplus.datastore.TokenDataStore
+import edu.cit.monreal.petcareplus.ui.theme.PetCarePlusTheme
 import edu.cit.monreal.petcareplus.ui.theme.PetCareTeal
 import edu.cit.monreal.petcareplus.ui.theme.TextGray
-import kotlinx.coroutines.launch
-import androidx.compose.ui.tooling.preview.Preview
-import edu.cit.monreal.petcareplus.ui.theme.PetCarePlusTheme
 
 @Composable
-fun DashboardScreen(
-    onLogout: () -> Unit
-) {
-    val ctx = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var email by remember { mutableStateOf<String?>(null) }
-    var role by remember { mutableStateOf<String?>(null) }
-
-    LaunchedEffect(Unit) {
-        val token = TokenDataStore.getToken(ctx)
-        if (token.isNullOrBlank()) {
-            onLogout()
-        } else {
-            email = TokenDataStore.getUserEmail(ctx)
-            role = TokenDataStore.getRole(ctx)
-        }
-    }
-
-    Column(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(24.dp)
-    ) {
+fun DashboardScreen(onLogout: () -> Unit) {
+    Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("PetCare Plus", style = MaterialTheme.typography.titleLarge)
-            TextButton(onClick = {
-                scope.launch {
-                    TokenDataStore.clearAll(ctx)
-                    onLogout()
-                }
-            }) { Text("Logout", color = PetCareTeal) }
-        }
-        Spacer(Modifier.height(16.dp))
-        Text("Welcome back!", style = MaterialTheme.typography.headlineMedium)
-        email?.let { Text(it, color = TextGray) }
-        role?.let {
-            Box(
-                modifier = Modifier.padding(top = 8.dp).background(PetCareTeal, shape = MaterialTheme.shapes.small).padding(horizontal = 8.dp, vertical = 4.dp)
-            ) {
-                Text(if (it == "SERVICE_PROVIDER") "Service Provider" else "Pet Owner", color = MaterialTheme.colorScheme.onPrimary)
+            TextButton(onClick = onLogout) {
+                Text("Logout", color = PetCareTeal)
             }
         }
+        Spacer(Modifier.height(24.dp))
+        Text("Welcome back!", style = MaterialTheme.typography.headlineMedium)
+        Text("You are logged in.", color = TextGray)
         Spacer(Modifier.height(32.dp))
         Button(onClick = {}, modifier = Modifier.fillMaxWidth()) {
             Text("Book a Service")
