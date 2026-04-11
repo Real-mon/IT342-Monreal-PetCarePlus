@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -33,7 +34,10 @@ public class AuthController {
     @GetMapping("/role")
     public ResponseEntity<Map<String, Object>> getRoleByEmail(@RequestParam("email") String email) {
         String role = authService.lookupRoleByEmail(email);
-        return ResponseEntity.ok(Map.of("success", true, "role", role));
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("success", true);
+        payload.put("role", role);
+        return ResponseEntity.ok(payload);
     }
 
     @PostMapping("/logout")

@@ -6,6 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 
 @SpringBootApplication
@@ -21,26 +24,52 @@ public class PetCarePlusApplication {
     }
 
     public static void main(String[] args) {
-        String configuredUrl = System.getProperty("spring.datasource.url");
-        if (configuredUrl == null || configuredUrl.isBlank()) configuredUrl = System.getenv("SPRING_DATASOURCE_URL");
-        if (configuredUrl == null || configuredUrl.isBlank()) configuredUrl = System.getenv("SUPABASE_DB_URL");
-
-        boolean hasPostgresUrl = configuredUrl != null && configuredUrl.trim().toLowerCase().startsWith("jdbc:postgresql://");
-        if (!hasPostgresUrl) {
-            String h2Url = "jdbc:h2:mem:petcareplus;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE";
-
-            System.setProperty("spring.datasource.url", h2Url);
-            System.setProperty("spring.datasource.username", "sa");
-            System.setProperty("spring.datasource.password", "");
-            System.setProperty("spring.datasource.driver-class-name", "org.h2.Driver");
-            System.setProperty("spring.jpa.properties.hibernate.dialect", "org.hibernate.dialect.H2Dialect");
-
-            System.setProperty("SUPABASE_DB_URL", h2Url);
-            System.setProperty("SUPABASE_DB_USER", "sa");
-            System.setProperty("SUPABASE_DB_PASSWORD", "");
-            System.setProperty("DB_DRIVER_CLASS", "org.h2.Driver");
-            System.setProperty("HIBERNATE_DIALECT", "org.hibernate.dialect.H2Dialect");
-        }
+        applySupabaseEnvFileOverrides();
         SpringApplication.run(PetCarePlusApplication.class, args);
+    }
+
+    private static void applySupabaseEnvFileOverrides() {
+        String existingUrl = System.getProperty("spring.datasource.url");
+        if (existingUrl == null || existingUrl.isBlank()) existingUrl = System.getenv("SPRING_DATASOURCE_URL");
+        boolean alreadyPostgres = existingUrl != null && existingUrl.trim().toLowerCase().startsWith("jdbc:postgresql://");
+        if (alreadyPostgres) return;
+
+        Map<String, String> envFile = readDotEnvFile(".env");
+        String supabaseUrl = envFile.get("SUPABASE_DB_URL");
+        String supabaseUser = envFile.get("SUPABASE_DB_USER");
+        String supabasePassword = envFile.get("SUPABASE_DB_PASSWORD");
+        String jwtSecret = envFile.get("JWT_SECRET");
+
+        if (supabaseUrl == null || supabaseUrl.isBlank()) return;
+
+        System.setProperty("spring.datasource.url", supabaseUrl);
+        if (supabaseUser != null) System.setProperty("spring.datasource.username", supabaseUser);
+        if (supabasePassword != null) System.setProperty("spring.datasource.password", supabasePassword);
+        System.setProperty("spring.datasource.driver-class-name", "org.postgresql.Driver");
+        System.setProperty("spring.jpa.properties.hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+
+        if (jwtSecret != null && !jwtSecret.isBlank()) {
+            System.setProperty("jwt.secret", jwtSecret);
+        }
+    }
+
+    private static Map<String, String> readDotEnvFile(String fileName) {
+        Path path = Path.of(fileName);
+        if (!Files.exists(path)) return Map.of();
+
+        try {
+            return Files.readAllLines(path).stream()
+                    .map(String::trim)
+                    .filter(line -> !line.isBlank())
+                    .filter(line -> !line.startsWith("#"))
+                    .filter(line -> line.contains("="))
+                    .collect(java.util.stream.Collectors.toUnmodifiableMap(
+                            line -> line.substring(0, line.indexOf('=')).trim(),
+                            line -> line.substring(line.indexOf('=') + 1).trim(),
+                            (a, b) -> b
+                    ));
+        } catch (IOException e) {
+            return Map.of();
+        }
     }
 }

@@ -1,48 +1,49 @@
-// This file renders a simple dashboard screen after login
+// This file routes to the correct dashboard (Pet Owner or Service Provider) based on stored role
 package edu.cit.monreal.petcareplus.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import edu.cit.monreal.petcareplus.datastore.TokenDataStore
 import edu.cit.monreal.petcareplus.ui.theme.PetCarePlusTheme
-import edu.cit.monreal.petcareplus.ui.theme.PetCareTeal
-import edu.cit.monreal.petcareplus.ui.theme.TextGray
 
 @Composable
 fun DashboardScreen(onLogout: () -> Unit) {
-    Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("PetCare Plus", style = MaterialTheme.typography.titleLarge)
-            TextButton(onClick = onLogout) {
-                Text("Logout", color = PetCareTeal)
-            }
+    val ctx = LocalContext.current
+    var role by remember { mutableStateOf<String?>(null) }
+    var email by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        val token = TokenDataStore.getToken(ctx)
+        if (token.isNullOrBlank()) {
+            onLogout()
+            return@LaunchedEffect
         }
-        Spacer(Modifier.height(24.dp))
-        Text("Welcome back!", style = MaterialTheme.typography.headlineMedium)
-        Text("You are logged in.", color = TextGray)
-        Spacer(Modifier.height(32.dp))
-        Button(onClick = {}, modifier = Modifier.fillMaxWidth()) {
-            Text("Book a Service")
-        }
+        role = TokenDataStore.getRole(ctx)
+        email = TokenDataStore.getUserEmail(ctx)
     }
+
+    val displayName = deriveNameFromEmail(email)
+
+    when (role) {
+        "SERVICE_PROVIDER" -> ServiceProviderDashboardScreen(displayName = displayName, onLogout = onLogout)
+        "PET_OWNER" -> PetOwnerDashboardScreen(displayName = displayName, onLogout = onLogout)
+        null -> Text("Loading…", modifier = Modifier)
+        else -> PetOwnerDashboardScreen(displayName = displayName, onLogout = onLogout)
+    }
+}
+
+private fun deriveNameFromEmail(email: String?): String {
+    val localPart = email?.substringBefore('@')?.trim().orEmpty()
+    if (localPart.isBlank()) return "there"
+    return localPart.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
 }
 
 @Preview(showBackground = true)
