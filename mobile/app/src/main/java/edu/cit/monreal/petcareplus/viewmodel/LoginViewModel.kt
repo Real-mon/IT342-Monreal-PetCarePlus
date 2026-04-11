@@ -7,8 +7,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
 import edu.cit.monreal.petcareplus.datastore.TokenDataStore
 import edu.cit.monreal.petcareplus.network.RetrofitClient
+import edu.cit.monreal.petcareplus.network.models.AuthResponse
 import edu.cit.monreal.petcareplus.network.models.LoginRequest
 import kotlinx.coroutines.launch
 
@@ -36,13 +38,27 @@ class LoginViewModel : ViewModel() {
                     if (!email.isNullOrBlank()) TokenDataStore.saveUserEmail(context, email)
                     onSuccess()
                 } else {
-                    errorMessage = "Invalid email or password. Please try again."
+                    val parsedError = parseErrorBody(res.errorBody()?.string())
+                    errorMessage = if (parsedError?.error?.code == "AUTH-001") {
+                        "Invalid email or password. Please try again."
+                    } else {
+                        "Invalid email or password. Please try again."
+                    }
                 }
             } catch (e: Exception) {
                 errorMessage = "Invalid email or password. Please try again."
             } finally {
                 isLoading = false
             }
+        }
+    }
+
+    private fun parseErrorBody(raw: String?): AuthResponse? {
+        if (raw.isNullOrBlank()) return null
+        return try {
+            Gson().fromJson(raw, AuthResponse::class.java)
+        } catch (_: Exception) {
+            null
         }
     }
 }
