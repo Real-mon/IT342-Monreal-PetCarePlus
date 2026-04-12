@@ -32,6 +32,10 @@ public class Booking {
     @JoinColumn(name = "schedule_id", nullable = false)
     private Schedule schedule;
 
+    @ManyToOne
+    @JoinColumn(name = "pet_id")
+    private Pet pet;
+
     @Column(nullable = false)
     private String status; // PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED
 
@@ -43,4 +47,3 @@ public class Booking {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 }
-

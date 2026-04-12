@@ -1,0 +1,639 @@
+.bsLayout {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  background: #f5f5f5;
+}
+
+.bsTopbar {
+  background: rgb(16, 110, 108);
+  color: #fff;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+}
+
+.bsBrand {
+  background: rgba(0, 0, 0, 0.15);
+  padding: 8px 12px;
+  font-weight: 700;
+}
+
+.bsTopNavWrap {
+  margin-left: 16px;
+  flex: 1;
+  display: none;
+}
+
+.bsTopNav {
+  display: flex;
+  background: #222;
+}
+
+.bsTopNav a {
+  padding: 8px 12px;
+  color: #ddd;
+  text-decoration: none;
+}
+
+.bsTopNav a.bsTopNavActive {
+  color: #fff;
+  background: #000;
+}
+
+.bsTopActions {
+  display: flex;
+  gap: 8px;
+}
+
+.bsIconBtn,
+.bsAvatar {
+  width: 36px;
+  height: 36px;
+  background: #222;
+  border: 1px solid #333;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bsIconBtn {
+  cursor: pointer;
+}
+
+.bsBody {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.bsSidebar {
+  width: 200px;
+  background: #0f8584;
+  border-right: 1px solid rgba(0, 0, 0, 0.15);
+  padding: 12px;
+}
+
+.bsUserCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.bsUserPic {
+  width: 48px;
+  height: 48px;
+  background: rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.bsUserName {
+  font-weight: 700;
+}
+
+.bsUserRole {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+}
+
+.bsSideNav {
+  display: flex;
+  flex-direction: column;
+}
+
+.bsSideNav a {
+  padding: 10px 8px;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.bsSideNav a.bsSideNavActive {
+  border-left: 4px solid rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.bsMain {
+  flex: 1;
+  background: #fff;
+  padding: 16px;
+  overflow: auto;
+}
+
+.bsTitle {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.bsSubtitle {
+  color: #777;
+}
+
+.bsStepRow {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+  position: relative;
+  align-items: center;
+}
+
+.bsStepRow::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 50%;
+  height: 2px;
+  background: #d1d5db;
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+.bsStepBox {
+  appearance: none;
+  font: inherit;
+  min-width: 0;
+  flex: 1;
+  padding: 10px 12px;
+  text-align: center;
+  border-radius: 6px;
+  background: #e5e7eb;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  z-index: 1;
+  font-weight: 600;
+  cursor: pointer;
+  color: black;
+}
+.bsStepBox2 {
+  appearance: none;
+  font: inherit;
+  min-width: 0;
+  flex: 1;
+  padding: 10px 12px;
+  text-align: center;
+  border-radius: 6px;
+  background: rgb(255, 255, 255);
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  z-index: 1;
+  font-weight: 600;
+  cursor: pointer;
+  color: black;
+}
+
+.bsStepActive {
+  background: rgb(15, 133, 132);
+  border-color: #1f2937;
+  color: #fff;
+  cursor: default;
+}
+
+.bsStepBox:hover:not(:disabled):not(.bsStepActive) {
+  border-color: rgba(15, 133, 132, 0.55);
+  color: #111827;
+}
+
+.bsStepBox:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.bsStepBox:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+.bsSummaryBar {
+  margin-top: 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #f8fafc;
+}
+
+.bsSummaryLeft {
+  min-width: 0;
+}
+
+.bsSummaryLabel {
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.bsSummaryMeta {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.bsSummaryBtn {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bsScheduleGrid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 16px;
+}
+
+.bsPanel {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px;
+  background: #fff;
+}
+
+.bsPanelTitle {
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.bsCalendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.bsCalMonth {
+  font-weight: 800;
+}
+
+.bsCalNavBtn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.bsCalendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.bsCalDow {
+  text-align: center;
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 700;
+  padding: 6px 0;
+}
+
+.bsDayBtn {
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 800;
+  color: black;
+}
+
+.bsDayBtn:disabled {
+  cursor: not-allowed;
+  color: #cbd5e1;
+  border-color: #f1f5f9;
+  background: #fafafa;
+}
+
+.bsDaySelected {
+  background: #0f8584;
+  border-color: #0f8584;
+  color: #fff;
+}
+
+.bsDayAvailable:not(.bsDaySelected) {
+  border-color: rgba(15, 133, 132, 0.35);
+}
+
+.bsLegend {
+  margin-top: 12px;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.bsLegendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.bsLegendAvail { background: rgba(15, 133, 132, 1); }
+.bsLegendUnavail { background: #cbd5e1; }
+
+.bsSlotsHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.bsSlotsDate {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.bsSlotSectionTitle {
+  color: #6b7280;
+  font-weight: 800;
+  font-size: 12px;
+  margin: 12px 0 8px;
+}
+
+.bsSlotBtn {
+  width: 100%;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 800;
+  margin-bottom: 10px;
+  color: black;
+}
+
+.bsSlotBtn:disabled {
+  cursor: not-allowed;
+  background: #f3f4f6;
+  color: #9ca3af;
+  border-color: #e5e7eb;
+}
+
+.bsSlotSelected {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
+.bsFooterRow {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bsBackBtn {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 800;
+  background-color: rgb(15, 133, 132);
+  color: rgb(255, 255, 255);
+}
+
+.bsNextBtn {
+  border: none;
+  background: #111;
+  color: #fff;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-weight: 900;
+  cursor: pointer;
+  background-color: rgb(15, 133, 132);
+}
+
+.bsNextBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.bsConfirmGrid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 16px;
+}
+
+.bsDataTable {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.bsDataTable tr + tr td {
+  border-top: 1px solid #f1f5f9;
+}
+
+.bsDataTable td {
+  padding: 12px 14px;
+  vertical-align: top;
+}
+
+.bsDataLabel {
+  width: 36%;
+  color: #6b7280;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.bsDataValue {
+  color: #111827;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.bsProviderImg {
+  height: 130px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+
+.bsSectionHeader {
+  font-weight: 900;
+  margin: 14px 0 8px;
+}
+
+.bsSmallText {
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.bsCheckRow {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.bsCheckRow input {
+  margin-top: 2px;
+  width: 18px;
+  height: 18px;
+}
+
+.bsPrimaryAction {
+  margin-top: 14px;
+  width: 100%;
+  border: none;
+  background: #111;
+  color: #fff;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.bsPrimaryAction:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.bsStatusStrip {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.bsStatusChip {
+  padding: 12px 12px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  font-weight: 800;
+  text-align: center;
+  color: #6b7280;
+}
+
+.bsStatusChipActive {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
+.bsStatusChipMuted {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+}
+
+.bsTrackGrid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 16px;
+}
+
+.bsActionRow {
+  margin-top: 12px;
+  display: flex;
+  gap: 12px;
+}
+
+.bsOutlineBtn {
+  flex: 1;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.bsTimelineList {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bsTimelineRow {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 0;
+}
+
+.bsTimelineMarker {
+  width: 22px;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.bsTimelineMarker::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  bottom: -10px;
+  width: 2px;
+  background: #e5e7eb;
+}
+
+.bsTimelineRow:last-child .bsTimelineMarker::before {
+  display: none;
+}
+
+.bsTimelineDot {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid #111;
+  background: #111;
+}
+
+.bsTimelineDotOpen {
+  background: #fff;
+  border-color: #cbd5e1;
+}
+
+.bsTimelineTitle {
+  font-weight: 900;
+  margin-bottom: 2px;
+}
+
+.bsTimelineMeta {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+@media (max-width: 900px) {
+  .bsScheduleGrid { grid-template-columns: 1fr; }
+  .bsConfirmGrid { grid-template-columns: 1fr; }
+  .bsTrackGrid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .bsSidebar { display: none; }
+  .bsStepRow { flex-direction: column; }
+  .bsStepRow::before { display: none; }
+}
