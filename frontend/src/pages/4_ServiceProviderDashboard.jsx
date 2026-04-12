@@ -1,7 +1,14 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import axiosClient from '../api/axiosClient.js'
 
-
+function formatTime(timeStr) {
+  if (!timeStr) return ''
+  const [hh, mm] = String(timeStr).split(':').map(Number)
+  if (Number.isNaN(hh) || Number.isNaN(mm)) return String(timeStr)
+  const d = new Date(2026, 0, 1, hh, mm, 0)
+  return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+}
 
 function decodeToken(token) {
   try {
@@ -15,7 +22,11 @@ function decodeToken(token) {
 export default function ServiceProviderDashboard() {
   const navigate = useNavigate()
   const primary = 'rgba(15, 133, 132, 1)'
-  const primarySoft = 'rgba(15, 133, 132, 0.12)'
+  const [displayName, setDisplayName] = useState(localStorage.getItem('displayName') || '')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [bookings, setBookings] = useState([])
+  const [services, setServices] = useState([])
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -34,148 +45,195 @@ export default function ServiceProviderDashboard() {
     navigate('/')
   }
 
+  useEffect(() => {
+    if (displayName) return
+    let isMounted = true
+    axiosClient.get('/api/profile').then((res) => {
+      const name = String(res?.data?.fullName || '').trim()
+      if (!name) return
+      localStorage.setItem('displayName', name)
+      if (isMounted) setDisplayName(name)
+    }).catch(() => {})
+    return () => {
+      isMounted = false
+    }
+  }, [displayName])
+
+  useEffect(() => {
+    let isMounted = true
+    const run = async () => {
+      setLoading(true)
+      setError('')
+      try {
+        const [bookingsRes, servicesRes] = await Promise.all([
+          axiosClient.get('/api/bookings/provider'),
+          axiosClient.get('/api/provider/services'),
+        ])
+        if (!isMounted) return
+        setBookings(bookingsRes?.data || [])
+        setServices(servicesRes?.data || [])
+      } catch (e) {
+        if (!isMounted) return
+        if (e?.response?.status === 401) {
+          localStorage.clear()
+          navigate('/', { replace: true })
+          return
+        }
+        setError(e?.response?.data?.error?.message || e?.response?.data?.message || 'Failed to load dashboard data.')
+      } finally {
+        if (isMounted) setLoading(false)
+      }
+    }
+    run()
+    return () => {
+      isMounted = false
+    }
+  }, [navigate])
+
+  const todayKey = (() => {
+    const d = new Date()
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${y}-${m}-${day}`
+  })()
+
+  const pendingCount = bookings.filter((b) => String(b?.status || '').toUpperCase() === 'PENDING').length
+  const todayCount = bookings.filter((b) => String(b?.scheduleDate || '') === todayKey).length
+  const totalCount = bookings.length
+  const serviceCount = services.length
   const stats = [
-    { value: '5', label: 'New Requests' },
-    { value: '3', label: 'Today' },
-    { value: '28', label: 'This Month' },
-    { value: '4.8', label: 'Rating' },
+    { value: String(pendingCount), label: 'Pending Requests' },
+    { value: String(todayCount), label: 'Today' },
+    { value: String(totalCount), label: 'Total Bookings' },
+    { value: String(serviceCount), label: 'Services' },
   ]
 
-  const requests = [
-    { owner: 'Juan Cruz', service: 'Full Grooming', pet: 'Buddy', date: 'Mar 3, 10AM', status: 'Pending', actions: 'PENDING' },
-    { owner: 'Maria Santos', service: 'Vet Check-up', pet: 'Kitty', date: 'Mar 4, 2PM', status: 'Pending', actions: 'PENDING' },
-    { owner: 'Pedro Reyes', service: 'Nail Trim', pet: 'Max', date: 'Mar 5, 11AM', status: 'Confirmed', actions: 'CONFIRMED' },
-  ]
-
-  const schedule = [
-    { time: '9:00 AM', client: 'Juan Cruz', service: 'Full Grooming' },
-    { time: '11:30 AM', client: 'Pedro Reyes', service: 'Nail Trim' },
-    { time: '2:00 PM', client: 'Maria Santos', service: 'Vet Check-up' },
-  ]
-
-  const services = [
-    { name: 'Full Grooming', meta: 'PHP 500 | 90 min' },
-    { name: 'Nail Trim', meta: 'PHP 250 | 30 min' },
-    { name: 'Bath & Dry', meta: 'PHP 350 | 60 min' },
-  ]
+  const todaysSchedule = bookings
+    .filter((b) => String(b?.scheduleDate || '') === todayKey)
+    .slice()
+    .sort((a, b) => String(a?.startTime || '').localeCompare(String(b?.startTime || '')))
 
   return (
     <div style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', background: '#f5f5f5' }}>
-      <div style={{ background: '#111', color: '#fff', height: 60, display: 'flex', alignItems: 'center', padding: '0 12px' }}>
-        <div style={{ background: '#1b1b1b', padding: '8px 12px', fontWeight: 700 }}>PetCare+</div>
-        <div style={{ marginLeft: 16, flex: 1, display: 'flex', justifyContent: 'center' }}>
-          <div style={{ display: 'flex', background: '#222', borderRadius: 0 }}>
-            <Link to="/provider-dashboard" style={{ padding: '8px 12px', color: '#fff', textDecoration: 'none', background: primary }}>Dashboard</Link>
-            <Link to="/bookings" style={{ padding: '8px 12px', color: '#eee', textDecoration: 'none' }}>My Bookings</Link>
-            <Link to="/provider-dashboard#services" style={{ padding: '8px 12px', color: '#eee', textDecoration: 'none' }}>My Services</Link>
-            <Link to="/profile" style={{ padding: '8px 12px', color: '#eee', textDecoration: 'none' }}>Profile</Link>
-          </div>
-        </div>
+      
+      {/* Navbar */}
+      <div style={{ background: 'rgb(16, 110, 108)', color: '#fff', height: 60, display: 'flex', alignItems: 'center', padding: '0 12px' }}>
+        <div style={{ background: 'rgba(0,0,0,0.15)', padding: '8px 12px', fontWeight: 700 }}>PetCare+</div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button aria-label="Search" style={{ width: 36, height: 36, background: '#222', border: '1px solid #333', color: '#fff', cursor: 'pointer' }}>🔍</button>
+          <button style={{ width: 36, height: 36, background: '#222', border: '1px solid #333', color: '#fff' }}>🔍</button>
           <div style={{ width: 36, height: 36, background: '#222', border: '1px solid #333', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>J</div>
         </div>
       </div>
 
-      <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
-        <aside className="sp-sidebar" style={{ width: 200, background: '#f5f5f5', borderRight: '1px solid #ddd', padding: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-            <div style={{ width: 48, height: 48, background: '#cfcfcf', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#777' }}>■</div>
+      <div style={{ flex: 1, display: 'flex' }}>
+        
+        {/* Sidebar */}
+        <aside className="sp-sidebar" style={{ width: 200, background: primary, padding: 12 }}>
+          <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+            <div style={{ width: 48, height: 48, background: 'rgba(0,0,0,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>■</div>
             <div>
-              <div style={{ fontWeight: 700 }}>Juan dela Cruz</div>
-              <div style={{ color: '#777', fontSize: 12 }}>Service Provider</div>
+              <div style={{ fontWeight: 700, color: '#fff' }}>{displayName || '—'}</div>
+              <div style={{ color: '#fff', fontSize: 12 }}>Service Provider</div>
             </div>
           </div>
+
           <nav style={{ display: 'flex', flexDirection: 'column' }}>
-            <Link to="/provider-dashboard" style={{ padding: '10px 8px', textDecoration: 'none', color: '#000', borderLeft: `4px solid ${primary}`, background: primarySoft }}>Dashboard</Link>
-            <Link to="/bookings" style={{ padding: '10px 8px', textDecoration: 'none', color: '#000' }}>Bookings</Link>
-            <Link to="/provider-dashboard#services" style={{ padding: '10px 8px', textDecoration: 'none', color: '#000' }}>My Services</Link>
-            <Link to="/provider-dashboard#schedule" style={{ padding: '10px 8px', textDecoration: 'none', color: '#000' }}>Schedule</Link>
-            <Link to="/profile" style={{ padding: '10px 8px', textDecoration: 'none', color: '#000' }}>Profile</Link>
-            <a href="#" onClick={(e) => { e.preventDefault(); logout(); }} style={{ padding: '10px 8px', textDecoration: 'none', color: '#000' }}>Logout</a>
+            <Link to="/provider-dashboard" style={{ padding: '10px 8px', color: '#fff' }}>Dashboard</Link>
+            <Link to="/bookings" style={{ padding: '10px 8px', color: '#fff' }}>Bookings</Link>
+            <Link to="/provider-services" style={{ padding: '10px 8px', color: '#fff' }}>My Services</Link>
+            <Link to="/provider-schedule" style={{ padding: '10px 8px', color: '#fff' }}>Schedule</Link>
+            <Link to="/profile" style={{ padding: '10px 8px', color: '#fff' }}>Profile</Link>
+            <a href="#" onClick={(e) => { e.preventDefault(); logout() }} style={{ padding: '10px 8px', color: '#fff' }}>Logout</a>
           </nav>
         </aside>
 
-        <main style={{ flex: 1, background: '#fff', padding: 16, overflow: 'auto' }}>
+        {/* Main */}
+        <main style={{ flex: 1, background: '#fff', padding: 16, color: '#111' }}>
+          
           <div>
             <div style={{ fontSize: 24, fontWeight: 800 }}>Provider Dashboard</div>
-            <div style={{ color: '#777' }}>Good morning! Here are your bookings.</div>
+            <div style={{ color: '#555' }}>Good morning! Here are your bookings.</div>
           </div>
 
+          {/* Stats */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginTop: 16 }}>
             {stats.map((s, idx) => (
-              <div key={idx} style={{ background: '#f5f5f5', padding: '16px 12px', textAlign: 'center' }}>
+              <div key={idx} style={{ background: '#f5f5f5', padding: 16, textAlign: 'center', color: '#111' }}>
                 <div style={{ fontSize: 24, fontWeight: 800 }}>{s.value}</div>
-                <div style={{ color: '#777', marginTop: 4 }}>{s.label}</div>
+                <div style={{ color: '#666' }}>{s.label}</div>
               </div>
             ))}
           </div>
 
+          {/* Booking Table */}
           <div style={{ marginTop: 20 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <div style={{ fontWeight: 700 }}>Booking Requests</div>
-              <button style={{ background: 'transparent', border: '1px solid #ccc', padding: '6px 10px', cursor: 'pointer' }}>View All</button>
-            </div>
+            <div style={{ fontWeight: 700, marginBottom: 8, color: '#111' }}>Booking Requests</div>
+
             <div style={{ border: '1px solid #e5e5e5' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr 1fr 1.1fr 0.9fr 1fr', padding: '10px 8px', background: '#f7f7f7', fontWeight: 600 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1.2fr 0.9fr 0.9fr 0.8fr', padding: 10, background: '#f7f7f7', color: '#111', fontWeight: 700 }}>
                 <div>Pet Owner</div>
                 <div>Service</div>
-                <div>Pet</div>
-                <div>Requested Date</div>
+                <div>Date</div>
+                <div>Time</div>
                 <div>Status</div>
-                <div>Actions</div>
               </div>
-              {requests.map((r, i) => (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr 1fr 1.1fr 0.9fr 1fr', padding: '10px 8px', borderTop: '1px solid #eee' }}>
-                  <div>{r.owner}</div>
-                  <div>{r.service}</div>
-                  <div>{r.pet}</div>
-                  <div>{r.date}</div>
-                  <div>{r.status}</div>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    {r.actions === 'PENDING' ? (
-                      <>
-                        <button style={{ background: 'transparent', border: '1px solid #ccc', padding: '4px 8px', cursor: 'pointer' }}>Accept</button>
-                        <button style={{ background: 'transparent', border: '1px solid #ccc', padding: '4px 8px', cursor: 'pointer' }}>Decline</button>
-                      </>
-                    ) : (
-                      <button style={{ background: 'transparent', border: '1px solid #ccc', padding: '4px 8px', cursor: 'pointer' }}>Update Status</button>
-                    )}
+
+              {loading ? (
+                <div style={{ padding: 10, color: '#6b7280' }}>Loading…</div>
+              ) : error ? (
+                <div style={{ padding: 10, color: '#b91c1c', fontWeight: 800 }}>{error}</div>
+              ) : bookings.length === 0 ? (
+                <div style={{ padding: 10, color: '#6b7280' }}>No bookings assigned yet.</div>
+              ) : (
+                bookings.map((b) => (
+                  <div key={b.bookingId} style={{ display: 'grid', gridTemplateColumns: '1.4fr 1.2fr 0.9fr 0.9fr 0.8fr', padding: 10, borderTop: '1px solid #eee', color: '#111' }}>
+                    <div>{b.petOwnerName || b.petOwnerEmail || b.petOwnerId || '—'}</div>
+                    <div>{b.serviceName || '—'}</div>
+                    <div>{b.scheduleDate || '—'}</div>
+                    <div>{b.startTime && b.endTime ? `${formatTime(b.startTime)} - ${formatTime(b.endTime)}` : '—'}</div>
+                    <div style={{ fontWeight: 800 }}>{b.status || '—'}</div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
 
+          {/* Bottom Sections */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 20 }}>
-            <div id="schedule">
-              <div style={{ fontWeight: 700, marginBottom: 8 }}>Today&apos;s Schedule</div>
-              <div style={{ border: '1px solid #e5e5e5' }}>
-                {schedule.map((s, idx) => (
-                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '100px 1fr', alignItems: 'center', padding: '10px 8px', borderTop: idx === 0 ? 'none' : '1px solid #eee', background: '#f9f9f9' }}>
-                    <div style={{ background: primary, color: '#fff', textAlign: 'center', padding: '8px 6px', width: 84, justifySelf: 'start' }}>{s.time}</div>
-                    <div>
-                      <div style={{ fontWeight: 700 }}>{s.client}</div>
-                      <div style={{ color: '#777', fontSize: 13 }}>{s.service}</div>
-                    </div>
+
+            {/* Schedule */}
+            <div>
+              <div style={{ fontWeight: 700, marginBottom: 8, color: '#111' }}>Today's Schedule</div>
+              {loading ? (
+                <div style={{ padding: 10, border: '1px solid #eee', color: '#6b7280' }}>Loading…</div>
+              ) : todaysSchedule.length === 0 ? (
+                <div style={{ padding: 10, border: '1px solid #eee', color: '#6b7280' }}>No bookings scheduled for today.</div>
+              ) : (
+                todaysSchedule.map((s) => (
+                  <div key={s.bookingId} style={{ padding: 10, border: '1px solid #eee', marginBottom: 5, color: '#111' }}>
+                    <strong>{formatTime(s.startTime)}</strong> - {s.petOwnerName || s.petOwnerEmail || s.petOwnerId || '—'} ({s.serviceName || '—'}) • {s.status || '—'}
                   </div>
-                ))}
-              </div>
+                ))
+              )}
             </div>
-            <div id="services">
-              <div style={{ fontWeight: 700, marginBottom: 8 }}>My Services</div>
-              <div style={{ border: '1px solid #e5e5e5' }}>
-                {services.map((svc, idx) => (
-                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', padding: '10px 8px', borderTop: idx === 0 ? 'none' : '1px solid #eee', background: '#f9f9f9' }}>
-                    <div>
-                      <div style={{ fontWeight: 700 }}>{svc.name}</div>
-                      <div style={{ color: '#777', fontSize: 13 }}>{svc.meta}</div>
-                    </div>
-                    <button style={{ background: 'transparent', border: '1px solid #ccc', padding: '6px 10px', cursor: 'pointer' }}>Edit</button>
+
+            {/* Services */}
+            <div>
+              <div style={{ fontWeight: 700, marginBottom: 8, color: '#111' }}>My Services</div>
+              {loading ? (
+                <div style={{ padding: 10, border: '1px solid #eee', color: '#6b7280' }}>Loading…</div>
+              ) : services.length === 0 ? (
+                <div style={{ padding: 10, border: '1px solid #eee', color: '#6b7280' }}>No services added yet.</div>
+              ) : (
+                services.map((svc) => (
+                  <div key={svc.serviceId} style={{ padding: 10, border: '1px solid #eee', marginBottom: 5, color: '#111' }}>
+                    <strong>{svc.name}</strong> - PHP {svc.price} | {svc.durationMinutes} min
                   </div>
-                ))}
-              </div>
+                ))
+              )}
             </div>
+
           </div>
         </main>
       </div>

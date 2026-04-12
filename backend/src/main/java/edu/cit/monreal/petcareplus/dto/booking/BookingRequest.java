@@ -10,5 +10,5 @@ import lombok.*;
 public class BookingRequest {
     private Long serviceId;
     private Long scheduleId;
+    private Long petId;
 }
-

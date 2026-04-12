@@ -59,6 +59,21 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.updateBookingStatus(id, status));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<BookingResponse> getBookingById(@PathVariable("id") Long id) {
+        requireRole("PET_OWNER");
+        Long userId = currentUserId();
+        return ResponseEntity.ok(bookingService.getBookingByOwner(id, userId));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> cancelBooking(@PathVariable("id") Long id) {
+        requireRole("PET_OWNER");
+        Long userId = currentUserId();
+        bookingService.cancelBookingByOwner(id, userId);
+        return ResponseEntity.noContent().build();
+    }
+
     private Long currentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();

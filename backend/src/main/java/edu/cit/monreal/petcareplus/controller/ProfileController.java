@@ -13,6 +13,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/profile")
 public class ProfileController {
@@ -36,12 +39,26 @@ public class ProfileController {
         return ResponseEntity.ok(profileService.updateProfile(userId, request));
     }
 
+    @PutMapping("/password")
+    public ResponseEntity<Map<String, Object>> changePassword(@RequestBody ChangePasswordRequest request) {
+        Long userId = currentUserId();
+        profileService.changePassword(userId, request.currentPassword, request.newPassword);
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("success", true);
+        return ResponseEntity.ok(payload);
+    }
+
     private Long currentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ApiException("DB-001", "Resource not found", "User not found", HttpStatus.NOT_FOUND));
         return user.getId();
+    }
+
+    public static class ChangePasswordRequest {
+        public String currentPassword;
+        public String newPassword;
     }
 }
 

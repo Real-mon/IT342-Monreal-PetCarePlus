@@ -9,6 +9,7 @@ import edu.cit.monreal.petcareplus.repository.ServiceRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,5 +47,24 @@ public class ServiceProviderService {
     @Transactional(readOnly = true)
     public List<Schedule> getProviderAvailability(Long providerId) {
         return scheduleRepository.findByProviderIdAndIsAvailableTrue(providerId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<edu.cit.monreal.petcareplus.model.Service> getProviderServices(Long providerId) {
+        return serviceRepository.findByProviderId(providerId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Schedule> getProviderAvailability(Long providerId, Long serviceId, LocalDate date) {
+        if (serviceId == null) {
+            if (date == null) return scheduleRepository.findByProviderIdAndIsAvailableTrue(providerId);
+            return scheduleRepository.findByProviderIdAndDate(providerId, date).stream()
+                    .filter(s -> Boolean.TRUE.equals(s.getIsAvailable()))
+                    .collect(Collectors.toList());
+        }
+        if (date == null) {
+            return scheduleRepository.findByProviderIdAndServiceIdAndIsAvailableTrue(providerId, serviceId);
+        }
+        return scheduleRepository.findByProviderIdAndServiceIdAndDateAndIsAvailableTrue(providerId, serviceId, date);
     }
 }
