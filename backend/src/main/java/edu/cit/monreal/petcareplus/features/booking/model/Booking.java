@@ -1,0 +1,53 @@
+// JPA entity for bookings made by pet owners
+package edu.cit.monreal.petcareplus.features.booking.model;
+
+import edu.cit.monreal.petcareplus.features.auth.model.User;
+import edu.cit.monreal.petcareplus.features.pets.model.Pet;
+import edu.cit.monreal.petcareplus.features.schedule.model.Schedule;
+import edu.cit.monreal.petcareplus.features.services.model.Service;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "bookings")
+public class Booking {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "booking_id")
+    private Long bookingId;
+
+    @ManyToOne
+    @JoinColumn(name = "pet_owner_id", nullable = false)
+    private User petOwner;
+
+    @ManyToOne
+    @JoinColumn(name = "service_id", nullable = false)
+    private Service service;
+
+    @ManyToOne
+    @JoinColumn(name = "schedule_id", nullable = false)
+    private Schedule schedule;
+
+    @ManyToOne
+    @JoinColumn(name = "pet_id")
+    private Pet pet;
+
+    @Column(nullable = false)
+    private String status; // PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+}

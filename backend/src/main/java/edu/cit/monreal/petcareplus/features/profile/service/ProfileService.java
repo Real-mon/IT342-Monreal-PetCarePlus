@@ -1,0 +1,84 @@
+// Business logic for retrieving and updating profiles
+package edu.cit.monreal.petcareplus.features.profile.service;
+
+import edu.cit.monreal.petcareplus.common.exception.ApiException;
+import edu.cit.monreal.petcareplus.features.auth.model.User;
+import edu.cit.monreal.petcareplus.features.profile.dto.ProfileRequest;
+import edu.cit.monreal.petcareplus.features.profile.dto.ProfileResponse;
+import edu.cit.monreal.petcareplus.features.profile.model.Profile;
+import edu.cit.monreal.petcareplus.features.profile.repository.ProfileRepository;
+import edu.cit.monreal.petcareplus.features.auth.repository.UserRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class ProfileService {
+    private final ProfileRepository profileRepository;
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+
+    public ProfileService(ProfileRepository profileRepository, UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+        this.profileRepository = profileRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Transactional(readOnly = true)
+    public ProfileResponse getProfile(Long userId) {
+        Profile profile = profileRepository.findByUserId(userId)
+                .orElseGet(() -> {
+                    User user = userRepository.findById(userId)
+                            .orElseThrow(() -> new ApiException("DB-001", "Resource not found", "User not found", HttpStatus.NOT_FOUND));
+                    Profile p = new Profile();
+                    p.setUser(user);
+                    return profileRepository.save(p);
+                });
+        return toResponse(profile);
+    }
+
+    @Transactional
+    public ProfileResponse updateProfile(Long userId, ProfileRequest request) {
+        Profile profile = profileRepository.findByUserId(userId)
+                .orElseGet(() -> {
+                    User user = userRepository.findById(userId)
+                            .orElseThrow(() -> new ApiException("DB-001", "Resource not found", "User not found", HttpStatus.NOT_FOUND));
+                    Profile p = new Profile();
+                    p.setUser(user);
+                    return p;
+                });
+        profile.setFullName(request.getFullName());
+        profile.setContactNumber(request.getContactNumber());
+        profile.setAddress(request.getAddress());
+        profile.setPhotoUrl(request.getPhotoUrl());
+        profile = profileRepository.save(profile);
+        return toResponse(profile);
+    }
+
+    @Transactional
+    public void changePassword(Long userId, String currentPassword, String newPassword) {
+        if (newPassword == null || newPassword.trim().length() < 8) {
+            throw new ApiException("AUTH-002", "Invalid password", "New password must be at least 8 characters", HttpStatus.BAD_REQUEST);
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException("DB-001", "Resource not found", "User not found", HttpStatus.NOT_FOUND));
+        if (currentPassword == null || !passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new ApiException("AUTH-001", "Invalid credentials", "Current password is incorrect", HttpStatus.UNAUTHORIZED);
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    private ProfileResponse toResponse(Profile p) {
+        return ProfileResponse.builder()
+                .profileId(p.getProfileId())
+                .userId(p.getUser().getId())
+                .fullName(p.getFullName())
+                .contactNumber(p.getContactNumber())
+                .address(p.getAddress())
+                .photoUrl(p.getPhotoUrl())
+                .build();
+    }
+}
+
